@@ -46,71 +46,6 @@ def circular_r2_score(true,pred):
     tot = sum(_smallestSignedAngleBetween(true,true.mean())**2)
     return 1 - (res/tot)
 
-class CVTuner(kt.engine.tuner.Tuner):
-    """
-    Add cross validation to keras tuner.
-    """
-
-    def run_trial(self, trial, x, y, sample_weight=None, batch_size=32, epochs=1, cv=None, callbacks=None, **kwargs):
-        """
-        batch_size : int
-        epochs : int
-        cv : cross validation splitter.
-            Should have split method that accepts x and y and returns train and test indicies.
-        callbacks : function that returns keras.callbacks.Callback instaces (in a list).
-            eg. callbacks = lambda : [keras.Callbacks.EarlyStopping('val_loss')]
-        """
-
-        y, y_class = y
-
-        oof_reg = np.zeros_like(y)
-        oof_cl = np.zeros_like(y_class)
-
-        batch_size = trial.hyperparameters.Int('batch_size', 32, 1024, step=32)
-
-        for train_indices, test_indices in cv.split(x, y_class):
-            x_train = x[train_indices]
-            x_test = x[test_indices]
-
-            y_train, y_test = y[train_indices], y[test_indices]
-            y_class_train, y_class_test = y_class[train_indices], y_class[test_indices]
-
-            y_train = (y_train, y_class_train)
-            y_test = (y_test, y_class_test)
-
-            if sample_weight is not None:
-                sw_train = [sw[train_indices] for sw in sample_weight]
-                sw_test = [sw[test_indices] for sw in sample_weight]
-            else:
-                sw_test = None
-                sw_train = None
-
-            model = self.hypermodel.build(trial.hyperparameters)
-
-            if callbacks is not None:
-                cb = callbacks()
-            else:
-                cb = None
-
-            model.fit(x_train, y_train,
-                      validation_data=(x_test, y_test, sw_test),
-                      batch_size=batch_size,
-                      epochs=epochs,
-                      sample_weight=sw_train,
-                      callbacks=cb,
-                      **kwargs)
-
-            r, c = model.predict(x_test, batch_size=batch_size)
-            oof_reg[test_indices] += r
-            oof_cl[test_indices] += c
-
-            tf.keras.backend.clear_session()
-
-        metric = paired_cosine_distances(y,oof_reg).mean() * (1-accuracy_score(y_class.argmax(axis=1),oof_cl.argmax(axis=1)))
-        self.oracle.update_trial(trial.trial_id, {'val_custom_metric':metric})
-
-### TRAINING
-
 def find_nearest_idx(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
@@ -209,67 +144,39 @@ def angle_mse_tf(true,pred,sample_weight=None):
 
 from tensorflow.keras import backend as K
 
-def denseblock(x, units=128, k=3, act='relu'):
+from train import superblock
 
-    features = [x]
-
-    for _ in range(k):
-        y = tf.keras.layers.Concatenate()(features) if len(features)>1 else features[0]
-        y = tf.keras.layers.Dense(units)(y)
-        y = tf.keras.layers.BatchNormalization()(y)
-        y = tf.keras.layers.Activation(act)(y)
-        features.append(y)
-
-    return features[-1]
-
-def superblock(x, hp, name='superblock'):
-    for i in range(hp.Int(f'num_{name}_blocks', 1, 9, default=2)):
-        u = hp.Int(f'num_{name}_{i}', 16, 512, sampling='log', default=128)
-        k = hp.Int(f'{name}_num_layers_in_block_{i}', 1, 16, sampling='log', default=3)
-        x = denseblock(x, u, k, hp.values['activation'])
-        x = tf.keras.layers.Dropout(hp.Float(f'dropout_{name}_{i}', 0.0, 0.5, step=0.1, default=0.2))(x)
-    return x
-
-import tensorflow as tf
-
-def create_model(hp, params):
+def create_model(params):
 
     inp = tf.keras.layers.Input(params['input_shape'])
 
-    act = hp.Choice('activation',['relu','elu','swish','sigmoid'],default='relu')
+    act = 'relu'
 
     x = inp
 
-    x = superblock(x, hp, name='common')
-    cl_output = superblock(x, hp, name='cl')
-    reg_output = superblock(x, hp, name='reg')
-    p_output = superblock(x, hp, name='p')
-    s_output = superblock(x, hp, name='s')
+    x = superblock(x, num_blocks=2, name='common')
+    cl_output = superblock(x, num_blocks=2, name='cl')
+    reg_output = superblock(x, num_blocks=2, name='reg')
+    p_output = superblock(x, num_blocks=2, name='p')
+    s_output = superblock(x, num_blocks=2, name='s')
 
     cl_output = tf.keras.layers.Dense(params['num_classes'], activation='softmax', name='cl_output')(cl_output)
     p_output = tf.keras.layers.Dense(params['num_p_classes'], activation='softmax', name='p_output')(p_output)
     s_output = tf.keras.layers.Dense(params['num_s_classes'], activation='softmax', name='s_output')(s_output)
 
     reg_output = tf.keras.layers.Dense(params['num_outputs'], activation='linear',
-                                       #activity_regularizer=UnitNormRegularizer(hp.Float('reg',0.0,1.0,step=0.1,default=0.1)),
                                        kernel_initializer='zeros',
                                        )(reg_output)
-    #reg_output = tfp.layers.DistributionLambda(lambda t: tfd.Normal(loc=t, scale=0.05))(reg_output)
-
-    #reg_output = tf.keras.layers.Lambda(lambda a: tf.linalg.normalize(a, axis=-1)[0])(reg_output)
-
+    
     model = tf.keras.Model(inputs=inp, outputs=[reg_output, cl_output, p_output, s_output])
 
-    alpha = hp.Float('alpha', 0.1, 0.9, step=0.1, default=0.5)
+    alpha = 0.5
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=hp.Float('lr',1e-7,0.1,sampling='log',default=1e-4)),
-                  loss=[tf.keras.losses.CosineSimilarity() if hp.Choice('reg_loss',['cs','mse'],default='mse') == 'cs' else 'mse',
-                        tf.keras.losses.CategoricalCrossentropy(
-                            label_smoothing=hp.Float('label_smoothing', 0.0, 0.1, step=0.01, default=0.0)),
-                        tf.keras.losses.CategoricalCrossentropy(
-                            label_smoothing=hp.Float('label_smoothing_p', 0.0, 0.1, step=0.01, default=0.0)),
-                        tf.keras.losses.CategoricalCrossentropy(
-                            label_smoothing=hp.Float('label_smoothing_s',0.0,0.1,step=0.01,default=0.0)),
+    model.compile(optimizer=tf.keras.optimizers.Adam(1e-4),
+                  loss=['mse',
+                        tf.keras.losses.CategoricalCrossentropy(),
+                        tf.keras.losses.CategoricalCrossentropy(),
+                        tf.keras.losses.CategoricalCrossentropy(),
                         ],
                   loss_weights=[alpha, 1-alpha, 1-alpha, 1-alpha],
                   weighted_metrics=([angle_mae_tf], ['accuracy'], ['accuracy'], ['accuracy'])
@@ -278,10 +185,7 @@ def create_model(hp, params):
 
 from sklearn.model_selection import train_test_split
 
-def run_experiment(NAME, X, y_reg, y_cl, tune=False, weight_class=False, weight_angle=False):
-
-    if tune:
-        NAME = 'tuned_' + NAME
+def run_experiment(NAME, X, y_reg, y_cl, weight_class=False, weight_angle=False):
 
     X, y, sw = load_data(X,y_reg,y_cl,weight_class,weight_angle)
 
@@ -296,37 +200,7 @@ def run_experiment(NAME, X, y_reg, y_cl, tune=False, weight_class=False, weight_
               'num_p_classes':y[2].shape[-1],
               'num_s_classes':y[3].shape[-1]}
 
-    cmf = lambda hp: create_model(hp, params)
-
-    if tune:
-        tuner = CVTuner(
-            hypermodel=cmf,
-            oracle=kt.oracles.BayesianOptimization(
-                objective=kt.Objective('val_custom_metric', direction='min'),
-                max_trials=100,
-                num_initial_points=10),
-            directory='tf/output',
-            project_name=f'{NAME}-csm-bayesian',
-            overwrite=False)
-
-        cv = KFold(n_splits=FOLDS)
-
-        tuner.search(X,
-                     y,
-                     sample_weight=sw,
-                     epochs=200,
-                     batch_size=BATCH_SIZE,
-                     cv=cv,
-                     callbacks=lambda : [tf.keras.callbacks.EarlyStopping('val_loss', patience=5),
-                                         tf.keras.callbacks.ReduceLROnPlateau('val_loss', patience=3, factor=0.5, verbose=1)],
-                     verbose=2)
-
-        best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
-        with open('tf/output/best_hps.pickle', 'wb') as handle:
-            pickle.dump(best_hps, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    else:
-        best_hps = kt.HyperParameters()
+    cmf = lambda : create_model(params)
 
     oof_reg = np.zeros_like(y[0])
     oof_cl = np.zeros_like(y[1])
@@ -344,10 +218,8 @@ def run_experiment(NAME, X, y_reg, y_cl, tune=False, weight_class=False, weight_
         X_train = X[tr_idx]
         X_test = X[te_idx]
 
-        model = cmf(best_hps)
-
-        model.summary()
-
+        model = cmf()
+        
         model.fit(X_train, [a[tr_idx] for a in y],
                   validation_data=(X_test, [a[te_idx] for a in y], [a[te_idx] for a in sw]),
                   callbacks=[tf.keras.callbacks.EarlyStopping('val_loss', patience=15),
@@ -371,9 +243,6 @@ def run_experiment(NAME, X, y_reg, y_cl, tune=False, weight_class=False, weight_
 
         model.save_weights(f'tf/output/models/{NAME}_model_fold_{i}.h5', save_format='h5')
         tf.keras.backend.clear_session()
-
-    if tune:
-        tuner.results_summary()
 
     np.save(f'tf/output/{NAME}_oof_reg_predictions.npy', oof_reg)
     np.save(f'tf/output/{NAME}_oof_class_predictions.npy', np.argmax(oof_cl, axis=-1))

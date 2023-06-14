@@ -7,10 +7,6 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.utils.class_weight import compute_sample_weight
 
 import pickle
-import keras_tuner as kt
-
-#from nais.metrics import circular_r2_score
-#from nais.Initializers import UnitCircleInitializer
 
 REPEATS = 1
 FOLDS = 5

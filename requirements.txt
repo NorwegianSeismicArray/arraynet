@@ -1,6 +1,6 @@
 obspy
 scipy
 scikit-learn
-keras-tuner
 matplotlib
 numpy
+tensorflow

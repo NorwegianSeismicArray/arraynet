@@ -2,8 +2,6 @@
 USER=user
 PROJECTNAME=arraynet
 # the script that starts the training of (different) models
-USER=andreask
-PROJECTNAME=arraynet
 SCRIPT_LOCATION=experiments.py
 # the actual code
 HELP_SCRIPT=train.py

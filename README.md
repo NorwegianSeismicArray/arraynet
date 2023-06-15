@@ -10,12 +10,20 @@ bash run.sh
 ```
 Edit the script and adjust to your working environment
 
-Input data in tf/data:
+Input data in `tf/data`:
 
 * `times_merged_arces_4Fre.np`y : time stamp for seismic arrivals
 * `X_merged_arces_4Fre.np`y : co-array phase patterns for all arrivals
 * `y_cl_merged_arces_4Fre.np`y : Arrival label (phase type)
 * `y_reg_merged_arces_4Fre.np`y : Back-azimuth to event source
+
+Due to limitations on file size on github we provide a reduced data set for training. However, we also provide the model trained with the full data set in:
+
+`tf/output_full/`
+
+The model trained with the reduced data set which can be reproduced is in:
+
+`tf/output/`
 
 
 Coming soon:

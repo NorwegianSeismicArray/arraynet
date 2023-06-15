@@ -1,29 +1,41 @@
-
 #DEFINE THESE
-USER=erik
-PROJECTNAME=csm
+USER=user
+PROJECTNAME=arraynet
+# the script that starts the training of (different) models
+USER=andreask
+PROJECTNAME=arraynet
 SCRIPT_LOCATION=experiments.py
+# the actual code
 HELP_SCRIPT=train.py
 REQUIREMENTS=requirements.txt
-LOCATION=/projects/active/MMON/Array_detection/ML_methods/csm_pattern_classification/tf/ 	#Will be mapped to /tf/data so make sure your scripts access data from /tf/data
+# directory with input (tf/data/)  and output data
+LOCATION=./tf
+# output for models
 OUTPUT=tf/output
-
-#LOGIC (DO NOT CHANGE)
+# working directory
+WORK_DIR=`pwd`
+# another working directory for faster training in case you are on a network disk (local disk, gpu, ...)
+# Modify script if WORK_DIR and BASE_DIR are the same
 BASE_DIR=/nobackup/$USER/$PROJECTNAME
-mkdir $BASE_DIR
+
+test -d $OUTPUT || mkdir $OUTPUT
+test -d $OUTPUT/models || mkdir $OUTPUT/models
+test -d $BASE_DIR || mkdir $BASE_DIR
+test -d $BASE_DIR/output || mkdir $BASE_DIR/output
+test -d $BASE_DIR/output/models || mkdir $BASE_DIR/output/models
+
 rsync -ahr --progress $LOCATION/* $BASE_DIR/
 
 cp $SCRIPT_LOCATION $BASE_DIR/script.py
 cp $HELP_SCRIPT $BASE_DIR/
 
 cp $REQUIREMENTS $BASE_DIR/req.txt
-#rm -rf $BASE_DIR/nais
-#git clone git@github.com:NorwegianSeismicArray/nais.git $BASE_DIR/nais
 
-#"'device=0'" uses only one, "'device=0,1'" will use both
-docker run -it --rm --gpus  '"device=1"' -v $BASE_DIR:/tf tensorflow/tensorflow:latest bash -c "pip install -r tf/req.txt
-                                                                                                python tf/script.py"
+cd $BASE_DIR
+bash -c "pip install -r req.txt
+         python script.py"
 
+cd $WORK_DIR
 #CLEAN UP
 rsync -ahr --progress $BASE_DIR/output/*.npy $OUTPUT
-
+rsync -ahr --progress $BASE_DIR/output/models/* $OUTPUT/models

@@ -11,10 +11,11 @@ bash run.sh
 Edit the script and adjust to your working environment
 
 Input data in tf/data:
-`times_merged_arces_4Fre.np`y : time stamp for seismic arrivals
-`X_merged_arces_4Fre.np`y : co-array phase patterns for all arrivals
-`y_cl_merged_arces_4Fre.np`y : Arrival label (phase type)
-`y_reg_merged_arces_4Fre.np`y : Back-azimuth to event source
+
+* `times_merged_arces_4Fre.np`y : time stamp for seismic arrivals
+* `X_merged_arces_4Fre.np`y : co-array phase patterns for all arrivals
+* `y_cl_merged_arces_4Fre.np`y : Arrival label (phase type)
+* `y_reg_merged_arces_4Fre.np`y : Back-azimuth to event source
 
 
 Coming soon:
@@ -55,7 +56,7 @@ Project Link: [https://github.com/NorwegianSeismicArray/arraynet](https://github
 ## Acknowledgments
 
 * ArrayNet models are built with [TensorFLow](https://www.tensorflow.org/)
-* ARCES waveform data from which the input data was generated are available via the [Norwegian EIDA node] (https://eida.geo.uib.no/webdc3/)
+* ARCES waveform data from which the input data was generated are available via the [Norwegian EIDA node](https://eida.geo.uib.no/webdc3/)
 * Reviewed seismic event bulletins from which the input data labels were obtained are available from the [Finish National Seismic Network](https://www.seismo.helsinki.fi/bulletin/list/norBull.html
 ) and [NORSAR](http://www.norsardata.no/NDC/bulletins/regional/)
 

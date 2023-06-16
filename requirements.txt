@@ -1,0 +1,6 @@
+obspy
+scipy
+scikit-learn
+matplotlib
+numpy
+tensorflow

@@ -25,10 +25,14 @@ The model trained with the reduced data set which can be reproduced is in:
 
 `tf/output/`
 
+Call this script to evaluate the model trained with the full data set (Confusion matrix, classification metrics, back-azimuth residuals):
+```
+python evaluate_models.py
+```
+
 
 Coming soon:
 
-* Scripts for prediction and evaluation
 * Scripts to generate input data from raw array waveforms
 * Scripts for sub-models
 

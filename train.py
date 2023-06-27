@@ -205,14 +205,14 @@ def run_experiment(NAME, X, y_reg, y_cl, weight_class=False, weight_angle=False)
         test_reg += p_reg / FOLDS
         test_cl += p_cl / FOLDS
 
-        model.save_weights(f'tf/output/models/{NAME}_model_fold_{i}.h5', save_format='h5')
+        model.save_weights(f'output/models/{NAME}_model_fold_{i}.h5', save_format='h5')
         tf.keras.backend.clear_session()
 
-    np.save(f'tf/output/{NAME}_oof_reg_predictions.npy', oof_reg)
-    np.save(f'tf/output/{NAME}_oof_class_predictions.npy', np.argmax(oof_cl, axis=-1))
+    np.save(f'output/{NAME}_oof_reg_predictions.npy', oof_reg)
+    np.save(f'output/{NAME}_oof_class_predictions.npy', np.argmax(oof_cl, axis=-1))
 
-    np.save(f'tf/output/{NAME}_test_reg_predictions.npy', test_reg)
-    np.save(f'tf/output/{NAME}_test_class_predictions.npy', np.argmax(test_cl, axis=-1))
+    np.save(f'output/{NAME}_test_reg_predictions.npy', test_reg)
+    np.save(f'output/{NAME}_test_class_predictions.npy', np.argmax(test_cl, axis=-1))
 
     true = np.angle(y[0].view(np.complex))
     pred = np.angle(oof_reg.view(np.complex))

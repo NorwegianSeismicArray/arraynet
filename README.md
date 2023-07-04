@@ -31,10 +31,15 @@ python evaluate_models.py
 ```
 
 
+Call this script to generate new input data from ARCES array data: 
+```
+python generate_input_data.py
+
+
+
 Coming soon:
 
-* Scripts to generate input data from raw array waveforms
-* Scripts for sub-models
+* Scripts for training sub-models
 
 
 ## Related publication

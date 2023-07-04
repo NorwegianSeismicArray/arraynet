@@ -1,3 +1,5 @@
+# Copyright 2023 Andreas Koehler, Erik Myklebust, MIT license
+
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.metrics import ConfusionMatrixDisplay,confusion_matrix
@@ -7,6 +9,8 @@ import numpy as np
 
 from train import create_model
 from train import load_data
+
+# Code for evaluating ArrayNet
 
 TAU = 2*np.pi
 def smallestSignedAngleBetween(x, y):

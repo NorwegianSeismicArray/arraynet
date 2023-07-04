@@ -1,6 +1,11 @@
+# Copyright 2023 Andreas Koehler, Erik Myklebust, MIT license
+
 import numpy as np
 from train import run_experiment
 from itertools import product
+
+# Code for training ArrayNet
+
 # base name of input data files
 NAME = 'merged_arces_4Fre'
 # input directories where data are located. Here you can add different data sets to train on.

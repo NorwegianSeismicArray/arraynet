@@ -1,12 +1,12 @@
+# Copyright 2023 Andreas Koehler, Erik Myklebust, MIT license
 
 import numpy as np
-
 from sklearn.model_selection import GroupKFold, KFold
 from sklearn.metrics import mean_absolute_error, accuracy_score, balanced_accuracy_score
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.utils.class_weight import compute_sample_weight
 
-import pickle
+# code for training ArrayNet
 
 REPEATS = 1
 FOLDS = 5

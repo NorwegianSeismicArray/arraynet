@@ -4,3 +4,5 @@ scikit-learn
 matplotlib
 numpy
 tensorflow
+multitaper
+utm

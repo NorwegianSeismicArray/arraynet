@@ -1,6 +1,5 @@
 #DEFINE THESE
 USER=user
-USER=andreask
 PROJECTNAME=arraynet
 # the script that starts the training of (different) models
 SCRIPT_LOCATION=experiments.py

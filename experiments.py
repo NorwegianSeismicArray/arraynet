@@ -1,13 +1,19 @@
 # Copyright 2023 Andreas Koehler, Erik Myklebust, MIT license
 
 import numpy as np
-from train import run_experiment
 from itertools import product
 
 # Code for training ArrayNet
 
-# base name of input data files
+# NAME is base name of input data files
+# only super model for P wave, S wave and noise class
 NAME = 'merged_arces_4Fre'
+from train import run_experiment
+# super and sub model for P/Pn/Pg wave, S/Sn/Sg wave and noise class
+#NAME = 'merged_arces_4Fre_regional'
+#from train import run_experiment_sub as run_experiment
+
+
 # input directories where data are located. Here you can add different data sets to train on.
 datasets = ['data']
 results = {}
@@ -30,4 +36,3 @@ for cw,sw in product([False],[False]):
         print(res)
 
 print(results)
-

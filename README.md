@@ -10,28 +10,40 @@ bash run.sh
 ```
 Edit the script and adjust to your working environment
 
-Input data in `tf/data`:
+Input data for super-model in `tf/data`:
 
 * `times_merged_arces_4Fre.np`y : time stamp for seismic arrivals
 * `X_merged_arces_4Fre.np`y : co-array phase patterns for all arrivals
 * `y_cl_merged_arces_4Fre.np`y : Arrival label (phase type)
 * `y_reg_merged_arces_4Fre.np`y : Back-azimuth to event source
 
-Due to limitations on file size on github we provide a reduced data set for training. However, we also provide the model trained with the full data set in:
+
+Input data for super- and sub-model in `tf/data`:
+
+* `times_merged_arces_4Fre_regional.np`y : time stamp for seismic arrivals
+* `X_merged_arces_4Fre_regional.np`y : co-array phase patterns for all arrivals
+* `y_cl_merged_arces_4Fre_regional.np`y : Arrival label (phase type)
+* `y_reg_merged_arces_4Fre_regional.np`y : Back-azimuth to event source
+
+
+Edit `experiments.py' to train one of both models.
+
+
+Due to limitations on file size on github we provide a reduced data set for training. However, we also provide the model trained with the full data set in (super-model only for now):
 
 `tf/output_full/`
 
-The model trained with the reduced data set which can be reproduced is in:
+The models trained with the reduced data set which can be reproduced are in:
 
 `tf/output/`
 
-Call this script to evaluate the model trained with the full data set (Confusion matrix, classification metrics, back-azimuth residuals):
+Call this script to evaluate the model trained with the full data set, including confusion matrix, classification metrics, and back-azimuth residuals (super-model only for now):
 ```
 python evaluate_models.py
 ```
 
 
-Call this script to generate new input data from ARCES array data: 
+Call this script to generate new input data from ARCES array data (saved under `tf/data/` with basename `test` ): 
 ```
 python generate_input_data.py
 ```
@@ -39,12 +51,12 @@ python generate_input_data.py
 
 Coming soon:
 
-* Scripts for training sub-models
+* Scripts for evaluating sub-models
 
 
 ## Related publication
 
-- Andreas Köhler, Erik B. Myklebust. **ArrayNet: A combined seismic phase classification and back-azimuth regression neural network for array processing pipelines**. In revisions for publication in BSSA, 2023.
+- Andreas Köhler, Erik B. Myklebust. **ArrayNet: A combined seismic phase classification and back-azimuth regression neural network for array processing pipelines**. Accepted for publication in BSSA, 2023.
 <!-- ([arXiv](https://arxiv.org/abs/2112.04605)) ([Paper](http://semantic-web-journal.org/content/prediction-adverse-biological-effects-chemicals-using-knowledge-graph-embeddings-0)) ([REPOSITORY](https://github.com/NIVA-Knowledge-Graph/KGs_and_Effect_Prediction_2020)) -->
 
 <a name="readme-top"></a>

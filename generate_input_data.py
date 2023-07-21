@@ -96,6 +96,9 @@ if __name__ == '__main__':
     catalog = 'merged'
     dataset = 'data'
     fbands = '_4Fre'
+    # inculding regional phases for sub-model
+    regional = True
+    if regional : fbands = '_4Fre_regional'
     PATH = 'tf/' + dataset +'/'
     arrival_times = np.load(PATH + 'times_'+catalog+'_'+array+fbands+'.npy',allow_pickle=True)[:samples]
     y = np.load(PATH + 'y_reg_'+catalog+'_'+array+fbands+'.npy')[:samples]
@@ -192,6 +195,7 @@ if __name__ == '__main__':
     plt.show()
 
     catalog = 'test'
+    if regional: catalog = 'test_regional'
     datapath = 'tf/data/'
     np.save(f'{datapath}/times_{catalog}_{array}.npy', times)
     np.save(f'{datapath}/X_{catalog}_{array}.npy', x)

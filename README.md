@@ -51,7 +51,7 @@ python generate_input_data.py
 
 ## Related publication
 
-- Andreas Köhler, Erik B. Myklebust. **ArrayNet: A combined seismic phase classification and back-azimuth regression neural network for array processing pipelines**. Accepted for publication in BSSA, 2023.
+- Andreas Köhler, Erik B. Myklebust. **ArrayNet: A combined seismic phase classification and back-azimuth regression neural network for array processing pipelines**. Accepted for publication in BSSA, 2023, https://doi.org/10.1785/0120230056
 <!-- ([arXiv](https://arxiv.org/abs/2112.04605)) ([Paper](http://semantic-web-journal.org/content/prediction-adverse-biological-effects-chemicals-using-knowledge-graph-embeddings-0)) ([REPOSITORY](https://github.com/NIVA-Knowledge-Graph/KGs_and_Effect_Prediction_2020)) -->
 
 <a name="readme-top"></a>
